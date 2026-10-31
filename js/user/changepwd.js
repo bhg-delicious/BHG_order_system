@@ -102,6 +102,11 @@ async function submitChangePassword() {
       resultDiv.innerHTML = `<div class="message success">✅ 密碼修改成功</div>`;
     }
 
+    // 📊 GA4：使用者修改密碼
+    pushCustomEvent('change_password', {
+      user_type: 'student'
+    });
+
     // 清空表單
     document.getElementById('changepwdOldPassword').value = '';
     document.getElementById('changepwdNewPassword').value = '';
