@@ -76,7 +76,7 @@ async function loadMealOrderPage() {
 
     menuCache = menuResult;
 
-    if (menuResult.success && menuResult.categories?.length) { // 此為GA4分析用函式
+    if (menuResult.success && menuResult.categories?.length) {
       const allItems = menuResult.categories.flatMap(cat =>
         cat.items.map(item => ({
           item_id: item.name,
@@ -168,7 +168,7 @@ function addOrderRestaurantMeal() {
   else cart.push({ category: category.name, name: item.name, price: item.price, amount: 1 });
 
   // 📊 GA4：加入購物車
-  pushEcommerceEvent('add_to_cart', { // 此為GA4分析用函式
+  pushEcommerceEvent('add_to_cart', {
     value: Number(item.price),
     items: [{
       item_id: item.name,           // 若菜單有獨立 ID，改用 item.id
@@ -278,7 +278,7 @@ async function submitOrder(event) {
     if (btn) setButtonLoading(btn, false);
     if (rpcError) throw new Error(rpcError.message);
 
-    const orderItems = cart.map(item => ({ // 此為GA4分析用函式
+    const orderItems = cart.map(item => ({
       item_id: item.name,
       item_name: item.name,
       item_category: item.category,
