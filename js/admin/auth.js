@@ -98,6 +98,12 @@ async function adminLogin(event) {
     // 登入成功
     AppState.setAdmin(true, data.session.access_token, null);
 
+    // 📊 GA4：管理員登入
+    pushCustomEvent('admin_login', {
+      method: 'email',
+      admin_email: email
+    });
+
     const statusText = document.getElementById('adminStatusText');
     const statusIcon = document.getElementById('adminStatusIcon');
     if (statusText) statusText.textContent = '已登入';
