@@ -103,6 +103,12 @@ async function loginFromGate(event) {
     AppState.setCurrentStudentId(studentId);
     fillAllStudentIdInputs(studentId, true);
 
+    // 📊 GA4：使用者登入
+    pushCustomEvent('login', {
+      method: 'email',
+      student_id: studentId
+    });
+
     if (resultDiv) {
       resultDiv.innerHTML = `<div class="message success">✅ 登入成功</div>`;
     }
@@ -244,6 +250,12 @@ async function registerUser(event) {
         <i class="fas fa-check-circle"></i> 申請成功！正在進入系統...
       </div>`;
     }
+
+    // 📊 GA4：使用者註冊
+    pushCustomEvent('sign_up', {
+      method: 'email',
+      student_id: studentId
+    });
 
     setTimeout(() => {
       navigateTo(getSmartHomePage());
