@@ -55,6 +55,12 @@ async function changeUserId(oldUserId, newUserId) {
 
     assertRpcSuccess(data, 'change_user_id');
 
+    // 📊 GA4：管理員更改學號
+    pushCustomEvent('change_user_id', {
+      old_user_id: oldUserId,
+      new_user_id: newUserId
+    });
+
     // ✅ 若被改的就是目前登入的學號，同步 AppState（否則頁面仍顯示舊學號）
     if (AppState.currentStudentId() === oldUserId) {
       AppState.setCurrentStudentId(newUserId);
