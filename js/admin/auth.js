@@ -269,6 +269,11 @@ async function changeAdminPassword(event) {
       `;
     }
 
+    // 📊 GA4：管理員修改密碼
+    pushCustomEvent('admin_change_password', {
+      user_type: 'admin'
+    });
+
     // 清空表單
     document.getElementById('adminOldPassword').value = '';
     document.getElementById('adminNewPassword').value = '';
