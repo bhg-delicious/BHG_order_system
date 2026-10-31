@@ -75,6 +75,23 @@ async function loadMealOrderPage() {
     }
 
     menuCache = menuResult;
+
+    if (menuResult.success && menuResult.categories?.length) { // 此為GA4分析用函式
+      const allItems = menuResult.categories.flatMap(cat =>
+        cat.items.map(item => ({
+          item_id: item.name,
+          item_name: item.name,
+          item_category: cat.name,
+          price: Number(item.price)
+        }))
+      );
+    
+      // 📊 GA4：檢視餐點列表
+      pushEcommerceEvent('view_item_list', {
+        items: allItems
+      });
+    }
+    
     renderCategorySelect(menuResult.categories);
 
     if (!mealsResult.error && mealsResult.data && mealsResult.data.length > 0) {
@@ -149,6 +166,19 @@ function addOrderRestaurantMeal() {
   const existing = cart.find(c => c.name === item.name && c.category === category.name);
   if (existing) existing.amount += 1;
   else cart.push({ category: category.name, name: item.name, price: item.price, amount: 1 });
+
+  // 📊 GA4：加入購物車
+  pushEcommerceEvent('add_to_cart', { // 此為GA4分析用函式
+    value: Number(item.price),
+    items: [{
+      item_id: item.name,           // 若菜單有獨立 ID，改用 item.id
+      item_name: item.name,
+      item_category: category.name,
+      price: Number(item.price),
+      quantity: 1
+    }]
+  });
+  
   renderCart();
   showMessageModal('✅ 已加入', `${item.name} x1`);
 }
@@ -247,6 +277,23 @@ async function submitOrder(event) {
     });
     if (btn) setButtonLoading(btn, false);
     if (rpcError) throw new Error(rpcError.message);
+
+    const orderItems = cart.map(item => ({ // 此為GA4分析用函式
+      item_id: item.name,
+      item_name: item.name,
+      item_category: item.category,
+      price: Number(item.price),
+      quantity: Number(item.amount)
+    }));
+    
+    const totalValue = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
+    
+    // 📊 GA4：完成訂單
+    pushEcommerceEvent('purchase', {
+      value: totalValue,
+      items: orderItems,
+    });
+    
     assertRpcSuccess(rpcResult, 'submit_order');
     showMessageModal('✅ 送出成功', `訂單已送出，共 ${rpcResult.itemCount} 種餐點，總計 $${rpcResult.total}`);
     cart = [];
