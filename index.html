@@ -42,7 +42,222 @@
     <link rel="canonical" href="https://bhg-delicious.github.io/BHG_order_system/?utm_source=canonical">
     <link rel="alternate" type="application/rss+xml" title="大家政便當廠 - 儲值點餐系統公告" href="assets/rss.xml">
 
-    <script src="assets/schema.json" type="application/ld+json"></script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://bhg-delicious.github.io/BHG_order_system/#organization",
+          "name": "BHG-delicious",
+          "url": "https://bhg-delicious.github.io/BHG_order_system/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://bhg-delicious.github.io/BHG_order_system/assets/icon-192.png"
+          },
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "bhg.delicious@gmail.com",
+            "availableLanguage": ["zh-TW"]
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://bhg-delicious.github.io/BHG_order_system/#website",
+          "url": "https://bhg-delicious.github.io/BHG_order_system/",
+          "name": "大家政便當廠-儲值點餐系統",
+          "inLanguage": "zh-Hant",
+          "publisher": { "@id": "https://bhg-delicious.github.io/BHG_order_system/#organization" },
+          "hasPart": {
+            "@type": "CreativeWork",
+            "name": "Sitemap",
+            "url": "https://bhg-delicious.github.io/BHG_order_system/sitemap.xml",
+            "fileFormat": "application/xml"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "@id": "https://bhg-delicious.github.io/BHG_order_system/#app",
+          "name": "大家政便當廠-儲值點餐系統",
+          "alternateName": "BHG 儲值點餐系統",
+          "description": "校園便當儲值與訂餐系統。學生以學號與密碼登入，可即時查詢餘額、於每日點餐時段線上點餐、檢視交易紀錄與用餐評價；管理員可設定當日餐廳、執行儲值與扣款、管理訂單與使用者，並檢視營運數據分析。支援 PWA 安裝、離線瀏覽與推播通知。",
+          "url": "https://bhg-delicious.github.io/BHG_order_system/",
+          "downloadUrl": "https://bhg-delicious.github.io/BHG_order_system/?utm_source=schema",
+          "image": "https://bhg-delicious.github.io/BHG_order_system/assets/icon-192.png",
+          "screenshot": [
+            {
+              "@type": "ImageObject",
+              "url": "https://bhg-delicious.github.io/BHG_order_system/assets/screenshots-2.jpg",
+              "caption": "學生端點餐與餘額查詢介面"
+            }
+          ],
+          "applicationCategory": "BusinessApplication",
+          "applicationSubCategory": "校園儲值與訂餐管理",
+          "operatingSystem": "Android, iOS, Windows, macOS",
+          "softwareVersion": "3.0.0",
+          "softwareRequirements": "支援 ES Modules 與 Service Worker 的現代瀏覽器；可安裝 PWA 並開啟通知",
+          "inLanguage": "zh-Hant",
+          "isAccessibleForFree": true,
+          "datePublished": "2026-11-01",
+          "author": {
+            "@type": "Person",
+            "name": "gtes10301"
+          },
+          "publisher": { "@id": "https://bhg-delicious.github.io/BHG_order_system/#organization" },
+          "isPartOf": { "@id": "https://bhg-delicious.github.io/BHG_order_system/#website" },
+          "offers": {
+            "@type": "Offer",
+            "price": "18763",
+            "priceCurrency": "TWD",
+            "availability": "https://schema.org/InStock",
+            "url": "https://bhg-delicious.github.io/BHG_order_system/"
+          },
+          "featureList": [
+            "學號與密碼登入，區分學生與管理員角色",
+            "餘額即時查詢與分頁交易紀錄",
+            "每日線上點餐與購物車，含點餐時段控制",
+            "管理員儲值、單筆扣款與批次扣款",
+            "訂單查詢（日期區間）與訂單明細",
+            "營運數據分析：總儲值、總消費、系統總餘額、平均餘額、消費排名與交易趨勢",
+            "學號變更並同步歷史交易與訂單資料",
+            "PWA 安裝、離線瀏覽與推播通知"
+          ],
+          "potentialAction": {
+            "@type": "InstallAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://bhg-delicious.github.io/BHG_order_system/",
+              "actionPlatform": [
+                "https://schema.org/DesktopWebPlatform",
+                "https://schema.org/MobileWebPlatform"
+              ]
+            }
+          }
+        },
+        {
+          "@type": "FAQPage",
+          "@id": "https://bhg-delicious.github.io/BHG_order_system/#faq",
+          "inLanguage": "zh-Hant",
+          "isPartOf": { "@id": "https://bhg-delicious.github.io/BHG_order_system/#website" },
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "如何註冊與登入系統？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "以 6 位學號與姓名註冊，並設定至少 6 位密碼；日後以學號與密碼登入。系統以「學號@bhg.app」作為認證識別，使用者無需輸入電子郵件。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "如何儲值？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "請聯繫管理員並交付款項，由管理員於後台財務頁面直接為你的帳戶儲值，餘額即時更新。系統目前未提供自助兌換碼或線上付款。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "如何點餐？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "登入後前往「點餐」頁，選擇品項與數量並送出。點餐開放時間為每日 08:00 至 10:00，且須管理員已設定當日餐廳；若未顯示點餐區塊，表示今日餐廳尚未設定或已逾時。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "如何查詢餘額與交易紀錄？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "登入後於首頁或查詢頁查看即時餘額；交易紀錄採分頁載入，每頁顯示 5 筆。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "為什麼每個帳戶都需要密碼？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "本系統涉及儲值與扣款，密碼用於確保帳戶僅由本人操作，降低資金糾紛與未授權存取的風險。密碼以不可逆雜湊方式儲存，系統人員無法還原明文密碼。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "忘記密碼怎麼辦？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "系統未提供自助密碼重設功能，請直接聯繫管理員協助處理。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "點餐、餐廳設定與評價的時間分別是什麼時候？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "學生點餐為 08:00 至 10:00；管理員設定當日餐廳為 08:00 至 12:00；用餐評價為 12:00 至 16:00。上述時段為前端提示窗口，實際交易仍以後端紀錄為準。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "如何將系統安裝到裝置上？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "以瀏覽器開啟系統後，依畫面提示選擇安裝；或從瀏覽器選單選擇「安裝應用程式」、「加到主畫面」或「建立捷徑」。安裝後可於獨立視窗開啟並支援離線瀏覽。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "如何接收系統通知？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "於提示或瀏覽器設定中允許本網站的通知權限。管理員設定當日餐廳後，系統會透過 OneSignal 推播通知訂閱者。若先前曾拒絕權限，需至瀏覽器的網站設定重新開啟。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "利息系統是什麼？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "針對負餘額（欠款）帳戶的半自動利息機制，由管理員每月手動執行至多一次，月利率 1.33%，管理員保留不計息的裁量權。此機制屬後端帳務規則，前端僅呈現計算結果。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "管理員可以執行哪些操作？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "管理員可設定當日餐廳與點餐截止時間、執行儲值與單筆或批次扣款、以日期區間查詢訂單明細、變更學號並同步歷史資料，以及檢視營運統計分析。所有權限驗證均由後端（Supabase Row Level Security）完成。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "系統會收集哪些個人資料？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "系統收集學號、姓名、密碼雜湊值、儲值與扣款紀錄、訂單紀錄，以及透過 Google Analytics 4 收集的頁面瀏覽、點擊、捲動深度與 JavaScript 錯誤等行為資料。詳細內容請參閱隱私權政策。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "系統使用哪些第三方服務？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "本系統使用 Supabase 提供資料庫與身份驗證、Google Analytics 4 與 Google Tag Manager 提供行為分析、OneSignal 提供推播通知。各服務僅於提供技術服務之必要範圍內接觸資料，詳細內容請參閱隱私權政策。"
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "系統的服務條款與隱私權政策在哪裡？",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "隱私權政策與服務條款可於網站的法律專區查閱，網址分別為 https://bhg-delicious.github.io/BHG_order_system/assets/legal/privacy_policy.txt 與 https://bhg-delicious.github.io/BHG_order_system/assets/legal/terms_of_service.txt。"
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
     <script src="https://www.googletagmanager.com/gtm.js?id=GTM-56DFMCCC" defer></script>
     <script src="https://www.googletagmanager.com/gtag/js?id=G-W1CE83K69G" defer></script>
     <script src="js/google/gtag.js" defer></script>
