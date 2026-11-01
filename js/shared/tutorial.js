@@ -191,9 +191,9 @@ function startTutorial(pageName) {
     }, 100);
 
     // 📊 GA4：新手教學
-    pushCustomEvent('tutorial', {
+    /*pushCustomEvent('tutorial', {
       page: pageName
-    });
+    });*/
 
     console.log('✅ 新手教學啟動成功，共', steps.length, '個步驟');
 
