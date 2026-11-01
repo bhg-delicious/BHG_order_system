@@ -1,0 +1,29 @@
+# 大家政便當廠 — BHG_order_system
+
+> 儲值點餐系統，提供學生線上訂餐、餘額儲值與訂單查詢，並設有管理端進行財務、用戶與營運管理。
+
+## 核心頁面
+
+- [使用者首頁](https://bhg-delicious.github.io/BHG_order_system/?page=user-home&utm_source=llms.txt): 登入後的總覽頁面，顯示餘額、今日餐點與快速入口。
+- [訂餐中心](https://bhg-delicious.github.io/BHG_order_system/?page=user-order&utm_source=llms.txt): 瀏覽餐廳與餐點分類，將品項加入購物車並送出訂單。
+- [我的帳號](https://bhg-delicious.github.io/BHG_order_system/?page=user-account&utm_source=llms.txt): 檢視學號、姓名、餘額、累計消費與歷史訂單記錄。
+- [管理端總覽](https://bhg-delicious.github.io/BHG_order_system/?page=admin-analytics&utm_source=llms.txt): 管理員登入後的營運儀表板，涵蓋財務、用戶與餐廳管理。
+
+## 管理功能
+
+- [財務管理](https://bhg-delicious.github.io/BHG_order_system/pages/admin/finance.html): 管理員檢視儲值、扣款與財務報表。
+- [用戶管理](https://bhg-delicious.github.io/BHG_order_system/pages/admin/users.html): 管理員查詢、新增、修改使用者資料與學號。
+- [營運管理](https://bhg-delicious.github.io/BHG_order_system/pages/admin/operations.html): 管理員操作扣款、儲值與訂單處理。
+- [分析報表](https://bhg-delicious.github.io/BHG_order_system/pages/admin/analytics.html): 管理員檢視營運分析數據。
+
+## 法律與政策
+
+- [隱私權政策](https://bhg-delicious.github.io/BHG_order_system/assets/legal/privacy_policy.txt): 說明個人資料搜集、處理與利用的方式。
+- [服務條款](https://bhg-delicious.github.io/BHG_order_system/assets/legal/terms_of_service.txt): 規範使用者與營運者間的權利義務關係。
+- [RSS Feed](https://bhg-delicious.github.io/BHG_order_system/assets/rss.xml): 系統公告與功能更新。
+
+## 技術說明
+
+- 本網站為 SPA（單頁應用），透過 `navigation.js` 的 `history.pushState` 切換頁面，URL 以 `?page=` 查詢參數區分。
+- 行為追蹤透過 `js/google/analytics.js` 推送事件至 GTM／GA4，涵蓋點擊、捲動、JS 錯誤與電商事件。
+- 離線支援由 Service Worker（Network-First 策略）與 `dino.html` 提供。
