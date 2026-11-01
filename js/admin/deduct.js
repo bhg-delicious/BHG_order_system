@@ -45,10 +45,10 @@ async function deductBalance(event) {
     assertRpcSuccess(data, 'admin_deduct');
 
     // 📊 GA4：管理員扣款
-    pushCustomEvent('deduct_success', {
+    /*pushCustomEvent('deduct_success', {
       student_id: studentId,
       amount: Number(amount)
-    });
+    });*/
 
     if (resultDiv) {
       resultDiv.innerHTML = `<div class="message success"><i class="fas fa-check-circle"></i> ${escapeHtml(data.message)}</div>`;
