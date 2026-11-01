@@ -121,7 +121,7 @@ async function executeDirectRecharge(userId, amountNum, note, btn) {
     assertRpcSuccess(data, 'admin_recharge');
 
     // 📊 GA4：管理員儲值（視為一筆購買/加值交易）
-    pushEcommerceEvent('purchase', {
+    /*pushEcommerceEvent('purchase', {
       value: Number(data.amount),
       items: [{
         item_id: 'RECHARGE',
@@ -132,7 +132,7 @@ async function executeDirectRecharge(userId, amountNum, note, btn) {
       extra: {
         transaction_id: `RECHARGE_${data.user_id}_${Date.now()}`
       }
-    });
+    });*/
 
     if (resultDiv) {
       resultDiv.innerHTML = `
