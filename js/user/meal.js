@@ -206,9 +206,9 @@ async function submitRating(studentId, slotIndex, rating, starContainer) {
     if (error) return showMessageModal('❌ 評分失敗', error.message);
 
     // 📊 GA4：使用者評分
-    pushCustomEvent('rate', {
+    /*pushCustomEvent('rate', {
       rate: rating
-    });
+    });*/
     
     showMessageModal('✅ 評分成功', `已評分 ${rating} 顆星`);
   } catch (error) {
