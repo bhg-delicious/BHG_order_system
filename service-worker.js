@@ -99,8 +99,8 @@ self.addEventListener('fetch', function (event) {
           }*/
 
           // 若過去未快取該頁面，則提供離線備用頁 offline.html
-          const offlineCache = await caches.open(CACHE_OFFLINE);
-          return await offlineCache.match(OFFLINE_FALLBACK_PAGE);
+          /*const offlineCache = await caches.open(CACHE_OFFLINE);
+          return await offlineCache.match(OFFLINE_FALLBACK_PAGE);*/
         }
       })()
     );
