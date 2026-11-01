@@ -1,0 +1,26 @@
+# security.txt for BHG_order_system
+# RFC 9116 compliant vulnerability disclosure policy
+# Served from GitHub Pages at the subpath /BHG_order_system/
+
+# 安全問題通報聯絡方式（必需）
+# 若你日後建立專屬安全信箱，請優先替換此處
+Contact: mailto:bhg.delicious@gmail.com
+
+# 檔案失效時間（必需，建議不超過一年）
+# 請於到期前更新，否則安全掃描工具會將其標記為設定錯誤
+Expires: 2027-11-01T00:00:00.000Z
+
+# 此檔案的正式 URI（建議填寫，便於工具驗證）
+# 必須與實際提供服務的 URL 完全一致
+Canonical: https://bhg-delicious.github.io/BHG_order_system/.well-known/security.txt
+
+# 安全政策頁面（建議填寫）
+# 目前指向隱私權政策中的資料安全維護章節
+# 若你日後建立獨立的 SECURITY.md 或安全政策頁，請替換此連結
+Policy: https://bhg-delicious.github.io/BHG_order_system/assets/legal/privacy_policy.txt
+
+# 偏好語言：繁體中文（台灣）
+Preferred-Languages: zh-TW
+
+# 本專案未提供漏洞賞金計畫
+Bug-Bounty: False
