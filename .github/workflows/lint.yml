@@ -31,7 +31,7 @@ jobs:
 
       - name: Check key files exist
         run: |
-          for f in index.html manifest.webmanifest service-worker.js styles.css icon-192.png icon-512.png; do
+          for f in index.html manifest.webmanifest service-worker.js styles.css assets/icon-192.png assets/icon-512.png; do
             if [ ! -f "$f" ]; then
               echo "❌ 缺少關鍵檔案: $f"
               exit 1
