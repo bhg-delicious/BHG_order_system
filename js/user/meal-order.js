@@ -1,20 +1,27 @@
 // ==================== meal-order.js ====================
-// 使用者點餐頁面模組（防死鎖、防無限迴圈、超時保護）
+// 使用者點餐頁面模組（防死鎖、防無限迴圈、超時保護、白名單賒帳）
 // ====================================================
 
 let menuCache = null;
 let cart = [];
 let userBalance = 0;
 let isMealOrderLoading = false;
+let isWhitelisted = false;
 
+/**
+ * 載入點餐頁面
+ */
 async function loadMealOrderPage() {
-  if (isMealOrderLoading) return;
-  
+  if (isMealOrderLoading) {
+    console.log('⏳ 點餐頁面正在載入中，跳過重複請求...');
+    return;
+  }
+
   const container = document.getElementById('orderMealsList');
+
   const studentId = AppState.currentStudentId();
-  
   if (!studentId) {
-    if (container) container.innerHTML = '<div class="message error">❌ 請先登入學生帳號</div>';
+    if (container) container.innerHTML = '<div class="message error">❌ 請先登入學生帳號才能點餐</div>';
     return;
   }
 
@@ -48,26 +55,42 @@ async function loadMealOrderPage() {
     }
 
     const restaurantNameEl = document.getElementById('orderTodayRestaurantName');
-    if (restaurantNameEl) restaurantNameEl.innerHTML = `<strong style="color: var(--secondary);">${escapeHtml(restaurantName)}</strong>`;
+    if (restaurantNameEl) {
+      restaurantNameEl.innerHTML = `<strong style="color: var(--secondary);">${escapeHtml(restaurantName)}</strong>`;
+    }
 
     cart = [];
     menuCache = null;
     userBalance = 0;
+    isWhitelisted = false;
 
     if (container) showConanLoading('orderMealsList', 'getRestaurantMenu');
 
     const sb = await initSupabase();
-    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('連線逾時')), 10000));
+
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('連線逾時，請檢查網路')), 10000)
+    );
 
     const fetchDataPromise = Promise.all([
       loadRestaurantMenu(restaurantName),
-      sb.from('today_meals').select('slot, restaurant, category, meal_name, amount, price, rated').eq('user_id', studentId).eq('is_archived', false).order('slot'),
-      sb.from('users').select('balance').eq('user_id', studentId).maybeSingle()
+      sb.from('today_meals')
+        .select('slot, restaurant, category, meal_name, amount, price, rated')
+        .eq('user_id', studentId)
+        .eq('is_archived', false)
+        .order('slot'),
+      sb.from('users').select('balance').eq('user_id', studentId).maybeSingle(),
+      sb.rpc('am_i_debt_whitelisted')
     ]);
 
-    const [menuResult, mealsResult, userResult] = await Promise.race([fetchDataPromise, timeoutPromise]);
+    const [menuResult, mealsResult, userResult, whitelistedResult] =
+      await Promise.race([fetchDataPromise, timeoutPromise]);
 
-    if (userResult.data) userBalance = Number(userResult.data.balance) || 0;
+    if (userResult.data) {
+      userBalance = Number(userResult.data.balance) || 0;
+    }
+
+    isWhitelisted = whitelistedResult?.data === true;
 
     if (!menuResult.success) {
       if (container) container.innerHTML = `<div class="message error">❌ ${escapeHtml(menuResult.message || '載入菜單失敗')}</div>`;
@@ -75,23 +98,6 @@ async function loadMealOrderPage() {
     }
 
     menuCache = menuResult;
-
-    if (menuResult.success && menuResult.categories?.length) {
-      const allItems = menuResult.categories.flatMap(cat =>
-        cat.items.map(item => ({
-          item_id: item.name,
-          item_name: item.name,
-          item_category: cat.name,
-          price: Number(item.price)
-        }))
-      );
-    
-      // 📊 GA4：檢視餐點列表
-      pushEcommerceEvent('view_item_list', {
-        items: allItems
-      });
-    }
-    
     renderCategorySelect(menuResult.categories);
 
     if (!mealsResult.error && mealsResult.data && mealsResult.data.length > 0) {
@@ -104,15 +110,12 @@ async function loadMealOrderPage() {
     }
 
     renderCart();
-    
-    // ★ 關鍵修正：點餐頁面載入後，直接去抓歷史訂單
-    if (typeof checkUserOrderHistory === 'function') {
-      await checkUserOrderHistory();
-    }
 
   } catch (error) {
     console.error('載入點餐頁面失敗:', error);
-    if (container) container.innerHTML = `<div class="message error">❌ ${escapeHtml(error.message || '載入失敗')}</div>`;
+    if (container) {
+      container.innerHTML = `<div class="message error">❌ ${escapeHtml(error.message || '載入失敗')}</div>`;
+    }
   } finally {
     isMealOrderLoading = false;
   }
@@ -121,6 +124,7 @@ async function loadMealOrderPage() {
 function renderCategorySelect(categories) {
   const select = document.getElementById('orderRestaurantCategorySelect');
   if (!select) return;
+
   select.innerHTML = '<option value="">請選擇分類</option>';
   categories.forEach((cat, idx) => {
     const option = document.createElement('option');
@@ -128,21 +132,27 @@ function renderCategorySelect(categories) {
     option.textContent = cat.name;
     select.appendChild(option);
   });
+
   const itemSelect = document.getElementById('orderRestaurantItemSelect');
-  if (itemSelect) itemSelect.innerHTML = '<option value="">請先選擇分類</option>';
+  if (itemSelect) {
+    itemSelect.innerHTML = '<option value="">請先選擇分類</option>';
+  }
 }
 
 function onRestaurantCategoryChange() {
   const select = document.getElementById('orderRestaurantCategorySelect');
   const itemSelect = document.getElementById('orderRestaurantItemSelect');
   if (!select || !itemSelect) return;
+
   const idx = select.value;
   if (idx === '') {
     itemSelect.innerHTML = '<option value="">請先選擇分類</option>';
     return;
   }
+
   const category = menuCache.categories[parseInt(idx)];
   itemSelect.innerHTML = '<option value="">請選擇餐點</option>';
+
   category.items.forEach((item, itemIdx) => {
     const option = document.createElement('option');
     option.value = itemIdx;
@@ -154,31 +164,33 @@ function onRestaurantCategoryChange() {
 function addOrderRestaurantMeal() {
   const catSelect = document.getElementById('orderRestaurantCategorySelect');
   const itemSelect = document.getElementById('orderRestaurantItemSelect');
+
   if (!catSelect || !itemSelect) return;
+
   const catIdx = catSelect.value;
   const itemIdx = itemSelect.value;
+
   if (catIdx === '' || itemIdx === '') {
     showMessageModal('❌ 輸入錯誤', '請選擇分類和餐點');
     return;
   }
+
   const category = menuCache.categories[parseInt(catIdx)];
   const item = category.items[parseInt(itemIdx)];
-  const existing = cart.find(c => c.name === item.name && c.category === category.name);
-  if (existing) existing.amount += 1;
-  else cart.push({ category: category.name, name: item.name, price: item.price, amount: 1 });
 
-  // 📊 GA4：加入購物車
-  pushEcommerceEvent('add_to_cart', {
-    value: Number(item.price),
-    items: [{
-      item_id: item.name,           // 若菜單有獨立 ID，改用 item.id
-      item_name: item.name,
-      item_category: category.name,
-      price: Number(item.price),
-      quantity: 1
-    }]
-  });
-  
+  const existing = cart.find(c => c.name === item.name && c.category === category.name);
+
+  if (existing) {
+    existing.amount += 1;
+  } else {
+    cart.push({
+      category: category.name,
+      name: item.name,
+      price: item.price,
+      amount: 1
+    });
+  }
+
   renderCart();
   showMessageModal('✅ 已加入', `${item.name} x1`);
 }
@@ -186,118 +198,202 @@ function addOrderRestaurantMeal() {
 function renderCart() {
   const container = document.getElementById('orderMealsList');
   if (!container) return;
+
   if (cart.length === 0) {
     container.innerHTML = `
       <p style="color: var(--gray);">尚未點餐</p>
       <div style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
-          <span>💰 目前餘額</span><span style="font-size: 1.3rem; font-weight: bold;">$${userBalance}</span>
+          <span>💰 目前餘額</span>
+          <span style="font-size: 1.3rem; font-weight: bold;">$${userBalance}</span>
         </div>
-      </div>`;
+      </div>
+    `;
+
     const submitBtn = document.getElementById('submitOrderBtn');
-    if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+    }
     return;
   }
+
   let html = '<div style="display: flex; flex-direction: column; gap: 10px;">';
   let grandTotal = 0;
+
   cart.forEach((item, idx) => {
     const total = item.amount * item.price;
     grandTotal += total;
+
     html += `
-      <div class="meal-item" data-idx="${idx}" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+      <div class="meal-item" data-idx="${idx}"
+           style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 8px;">
         <div>
-          <strong>${escapeHtml(item.name)}</strong><span style="color: var(--gray); font-size: 0.85rem;"> x${item.amount}</span>
-          <div style="font-size: 0.8rem; color: var(--gray);">${escapeHtml(item.category)} - $${item.price}元/份</div>
+          <strong>${escapeHtml(item.name)}</strong>
+          <span style="color: var(--gray); font-size: 0.85rem;"> x${item.amount}</span>
+          <div style="font-size: 0.8rem; color: var(--gray);">
+            ${escapeHtml(item.category)} - $${item.price}元/份
+          </div>
         </div>
         <div>
           <span style="font-weight: bold;">$${total}</span>
           <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <button class="btn btn-secondary meal-adjust-btn" data-idx="${idx}" data-change="-1" style="width: auto; padding: 2px 8px;">-</button>
+            <button class="btn btn-secondary meal-adjust-btn" data-idx="${idx}" data-change="-1"
+                    style="width: auto; padding: 2px 8px;">-</button>
             <span style="min-width: 30px; text-align: center;">${item.amount}</span>
-            <button class="btn btn-secondary meal-adjust-btn" data-idx="${idx}" data-change="1" style="width: auto; padding: 2px 8px;">+</button>
+            <button class="btn btn-secondary meal-adjust-btn" data-idx="${idx}" data-change="1"
+                    style="width: auto; padding: 2px 8px;">+</button>
           </div>
         </div>
-      </div>`;
+      </div>
+    `;
   });
+
   html += '</div>';
+
   const remaining = userBalance - grandTotal;
   const isOverBudget = remaining < 0;
+  const canProceed = !isOverBudget || isWhitelisted;
+
   html += `
     <div style="margin-top: 15px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span>💰 目前餘額</span><span style="font-weight: bold;">$${userBalance}</span></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;"><span>🍱 今日餐點總計</span><span style="font-weight: bold;">$${grandTotal}</span></div>
-      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
-        <span><strong>${isOverBudget ? '不足金額' : '剩餘可用'}</strong></span>
-        <span style="font-size: 1.3rem; font-weight: bold; ${isOverBudget ? 'color: #ffcccc;' : ''}">${isOverBudget ? `-$${Math.abs(remaining)}` : `$${remaining}`}</span>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span>💰 目前餘額</span>
+        <span style="font-weight: bold;">$${userBalance}</span>
       </div>
-    </div>`;
-  if (isOverBudget) {
-    html += `<div class="message error" style="margin-top: 10px;"><i class="fas fa-exclamation-triangle"></i> 餘額不足！還需要 <strong>$${Math.abs(remaining)}</strong></div>`;
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span>🍱 今日餐點總計</span>
+        <span style="font-weight: bold;">$${grandTotal}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.3);">
+        <span><strong>${isOverBudget ? (isWhitelisted ? '欠款金額' : '不足金額') : '剩餘可用'}</strong></span>
+        <span style="font-size: 1.3rem; font-weight: bold; ${isOverBudget ? 'color: #ffcccc;' : ''}">
+          ${isOverBudget ? `-$${Math.abs(remaining)}` : `$${remaining}`}
+        </span>
+      </div>
+    </div>
+  `;
+
+  if (isOverBudget && isWhitelisted) {
+    html += `
+      <div class="message warning" style="margin-top: 10px;">
+        <i class="fas fa-exclamation-triangle"></i>
+        你的餘額不足 <strong>$${Math.abs(remaining)}</strong>，
+        送出後將變成欠款（你在白名單中）
+      </div>
+    `;
+  } else if (isOverBudget) {
+    html += `
+      <div class="message error" style="margin-top: 10px;">
+        <i class="fas fa-exclamation-triangle"></i>
+        餘額不足！還需要 <strong>$${Math.abs(remaining)}</strong>，請先儲值或減少餐點。
+      </div>
+    `;
   }
+
   container.innerHTML = html;
+
   container.querySelectorAll('.meal-adjust-btn').forEach(btn => {
     btn.addEventListener('click', function(e) {
       e.stopPropagation();
-      adjustCartItem(parseInt(this.dataset.idx), parseInt(this.dataset.change));
+      const idx = parseInt(this.dataset.idx);
+      const change = parseInt(this.dataset.change);
+      adjustCartItem(idx, change);
     });
   });
+
   const submitBtn = document.getElementById('submitOrderBtn');
   if (submitBtn) {
-    if (isOverBudget || cart.length === 0) { submitBtn.disabled = true; submitBtn.style.opacity = '0.5'; submitBtn.style.cursor = 'not-allowed'; }
-    else { submitBtn.disabled = false; submitBtn.style.opacity = ''; submitBtn.style.cursor = ''; }
+    if (!canProceed || cart.length === 0) {
+      submitBtn.disabled = true;
+      submitBtn.style.opacity = '0.5';
+      submitBtn.style.cursor = 'not-allowed';
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '';
+      submitBtn.style.cursor = '';
+    }
   }
 }
 
 function adjustCartItem(idx, change) {
   if (idx < 0 || idx >= cart.length) return;
+
   cart[idx].amount += change;
-  if (cart[idx].amount <= 0) cart.splice(idx, 1);
+
+  if (cart[idx].amount <= 0) {
+    cart.splice(idx, 1);
+  }
+
   renderCart();
 }
 
 async function submitOrder(event) {
   const btn = event ? event.currentTarget : document.getElementById('submitOrderBtn');
+
   await ensureTimeLimitsLoaded();
   await ensureTodayRestaurantLoaded();
 
-  if (AppState.todayStatus() !== 'open') return showMessageModal('❌ 無法送出', '今日訂餐已截止');
-  if (!isUserOrderTime()) return showMessageModal('❌ 非點餐時間', '點餐時間已過');
-  if (cart.length === 0) return showMessageModal('❌ 錯誤', '尚未點任何餐點');
+  if (AppState.todayStatus() !== 'open') {
+    showMessageModal('❌ 無法送出', '今日訂餐已截止，無法送出訂單');
+    return;
+  }
+
+  if (!isUserOrderTime()) {
+    showMessageModal('❌ 非點餐時間', '點餐時間已過，無法送出');
+    return;
+  }
+
+  if (cart.length === 0) {
+    showMessageModal('❌ 錯誤', '尚未點任何餐點');
+    return;
+  }
 
   const studentId = AppState.currentStudentId();
   const restaurantName = AppState.currentRestaurantName();
-  if (!studentId || !restaurantName) return showMessageModal('❌ 錯誤', '資料不完整');
+
+  if (!studentId || !restaurantName) {
+    showMessageModal('❌ 錯誤', '資料不完整，請重新載入頁面');
+    return;
+  }
 
   if (btn) setButtonLoading(btn, true);
+
   try {
     const sb = await initSupabase();
-    const itemsPayload = cart.map(item => ({ meal_name: item.name, amount: item.amount }));
-    const { data: rpcResult, error: rpcError } = await sb.rpc('submit_order', {
-      p_user_id: studentId, p_restaurant: restaurantName, p_items: itemsPayload
-    });
-    if (btn) setButtonLoading(btn, false);
-    if (rpcError) throw new Error(rpcError.message);
 
-    const orderItems = cart.map(item => ({
-      item_id: item.name,
-      item_name: item.name,
-      item_category: item.category,
-      price: Number(item.price),
-      quantity: Number(item.amount)
+    const itemsPayload = cart.map(item => ({
+      meal_name: item.name,
+      amount: item.amount
     }));
-    
-    const totalValue = cart.reduce((sum, item) => sum + item.price * item.amount, 0);
-    
-    // 📊 GA4：完成訂單
-    pushEcommerceEvent('purchase', {
-      value: totalValue,
-      items: orderItems,
+
+    const { data: rpcResult, error: rpcError } = await sb.rpc('submit_order', {
+      p_user_id: studentId,
+      p_restaurant: restaurantName,
+      p_items: itemsPayload
     });
-    
+
+    if (btn) setButtonLoading(btn, false);
+
+    if (rpcError) {
+      throw new Error(rpcError.message);
+    }
+
     assertRpcSuccess(rpcResult, 'submit_order');
-    showMessageModal('✅ 送出成功', `訂單已送出，共 ${rpcResult.itemCount} 種餐點，總計 $${rpcResult.total}`);
+
+    const successMsg = rpcResult.overdraft
+      ? `訂單已送出，共 ${rpcResult.itemCount} 種餐點，總計 $${rpcResult.total}\n\n⚠️ 你的餘額不足，目前已欠款 $${Math.abs(rpcResult.new_balance)}`
+      : `訂單已送出，共 ${rpcResult.itemCount} 種餐點，總計 $${rpcResult.total}`;
+
+    showMessageModal('✅ 送出成功', successMsg);
+
     cart = [];
-    if (typeof loadMealOrderPage === 'function') await loadMealOrderPage();
+
+    if (typeof loadMealOrderPage === 'function') {
+      await loadMealOrderPage();
+    }
+
   } catch (error) {
     if (btn) setButtonLoading(btn, false);
     console.error('送出訂單失敗:', error);
@@ -310,4 +406,4 @@ window.onRestaurantCategoryChange = onRestaurantCategoryChange;
 window.addOrderRestaurantMeal = addOrderRestaurantMeal;
 window.submitOrder = submitOrder;
 
-console.log('🍽️ 點餐模組已載入（防死鎖優化版）');
+console.log('🍽️ 點餐模組已載入（白名單賒帳版）');
