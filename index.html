@@ -2,13 +2,12 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <base href="https://bhg-delicious.github.io/BHG_order_system/" target="_blank">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="keywords" content="大家政, 便當廠, 儲值系統, 訂餐系統">
     <meta name="description" content="校園儲值與訂餐系統">
     <meta name="author" content="gtes10301">
 
-    <link rel="icon" type="image/png" href="assets/icon-192.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
     <title>大家政便當廠-儲值系統</title>
 
     <link rel="manifest" href="manifest.webmanifest" type="application/manifest+json">
@@ -17,12 +16,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="便當廠">
-    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
 
     <link rel="preconnect" href="https://wvvmnombzkkrtxxxucqe.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
-    <link rel="preconnect" href="https://analytics.google.com">
-    <link rel="preconnect" href="https://api.onesignal.com">
     <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm">
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.es6.js" defer></script>
@@ -37,20 +34,11 @@
     </noscript>
 
     <link rel="stylesheet" href="styles.css">
-    
-    <link rel="canonical" href="https://bhg-delicious.github.io/BHG_order_system/?utm_source=canonical">
-    <meta name="google-site-verification" content="AkQAikafnBmeebrxOdgJlXoEXnwoEqwnDiyBI6UW8ho">
-    <link rel="alternate" type="application/rss+xml" title="大家政便當廠 - 儲值點餐系統公告" href="assets/rss.xml">
-    
-    <script src="https://www.googletagmanager.com/gtm.js?id=GTM-56DFMCCC" defer></script>
-    <script src="https://www.googletagmanager.com/gtag/js?id=G-W1CE83K69G" defer></script>
-    <script src="js/google/gtag.js" defer></script>
-    <script src="js/google/analytics.js" defer></script>
 </head>
 <body>
     <header class="header">
         <div class="logo-container">
-            <img src="assets/icon-192.png" alt="BHG-logo" class="site-logo">
+            <img src="icon-192.png" alt="BHG-logo" class="site-logo">
         </div>
 
         <div class="title-container">
@@ -71,7 +59,7 @@
         </div>
     </header>
 
-    <main id="pageContent">
+    <div id="pageContent">
 
         <!-- ==================== 登入 / 註冊頁面（首頁寫死） ==================== -->
         <div id="page-user-register" class="page-container active">
@@ -215,7 +203,7 @@
 
         </div>
 
-    </main>
+    </div>
 
     <button id="navToggleBtn" class="nav-toggle-btn" style="display: none;">
         <i class="fas fa-chevron-down"></i>
@@ -386,24 +374,52 @@
         </div>
     </div>
 
+    <!-- ══════════════════════════════════════════════════════════
+         Service Worker：從 Supabase 讀版本號 → 帶入 SW URL → 自動更新
+         ══════════════════════════════════════════════════════════ -->
     <script>
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', function() {
-          // 1. 註冊 Service Worker，並強制不使用 HTTP 快取讀取 SW 腳本
-          navigator.serviceWorker.register('service-worker.js', {
-            scope: '/BHG_order_system/',
-            updateViaCache: 'none' // 關鍵：永遠去伺服器檢查 service-worker.js 是否有更新
+        window.addEventListener('load', async function() {
+          // 1. 從 Supabase 讀取系統版本號
+          let version = 'unknown';
+          try {
+            const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');
+            const sb = createClient(
+              'https://wvvmnombzkkrtxxxucqe.supabase.co',
+              'sb_publishable_oK9kGQMbcBdGyoerrrfDzQ_yWyRZcQf'
+            );
+            const { data, error } = await sb
+              .from('system_settings')
+              .select('value')
+              .eq('key', 'version')
+              .maybeSingle();
+
+            if (error) {
+              console.warn('⚠️ 讀取版本號失敗:', error.message);
+            } else {
+              version = data?.value || 'unknown';
+            }
+          } catch (e) {
+            console.warn('⚠️ 讀取版本號異常:', e);
+          }
+
+          console.log('📌 系統版本:', version);
+
+          // 2. 把版本號帶進 SW URL
+          const swUrl = `service-worker.js?v=${encodeURIComponent(version)}`;
+
+          navigator.serviceWorker.register(swUrl, {
+            scope: '/bhg-frontend/',
+            updateViaCache: 'none'
           })
             .then(function(registration) {
-              console.log('✅ Service Worker 註冊成功');
+              console.log('✅ Service Worker 註冊成功:', swUrl);
 
-              // 2. 監聽是否有新的 Service Worker 正在安裝
               registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 console.log('🔄 發現新版本的 Service Worker');
 
                 newWorker.addEventListener('statechange', () => {
-                  // 當新 SW 安裝完成，且已經有舊 SW 在控制頁面時
                   if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                     console.log('📥 新版本已就緒，發送 SKIP_WAITING 指令...');
                     newWorker.postMessage({ type: 'SKIP_WAITING' });
@@ -415,18 +431,21 @@
               console.warn('⚠️ Service Worker 註冊失敗:', error);
             });
 
-          // 3. 監聽 Service Worker 控制權變更（代表新 SW 已經接管）
+          // 3. 控制權變更 → 自動重整
           let refreshing;
           navigator.serviceWorker.addEventListener('controllerchange', () => {
             if (refreshing) return;
             refreshing = true;
             console.log('🔄 Service Worker 已更新，自動重新整理頁面...');
-            window.location.reload(); // 自動重整，載入最新畫面
+            window.location.reload();
           });
         });
       }
     </script>
 
+    <!-- ══════════════════════════════════════════════════════════
+         OneSignal 推播
+         ══════════════════════════════════════════════════════════ -->
     <script>
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       OneSignalDeferred.push(async function(OneSignal) {
@@ -435,8 +454,8 @@
             appId: "fb14b87c-e10e-4aa0-8613-0f2b05e5c937",
             safari_web_id: "web.onesignal.auto.2510e921-2066-4b3b-be25-8e0e09bd836c",
             notifyButton: { enable: false },
-            serviceWorkerParam: { scope: "/BHG_order_system/onesignal/" },
-            serviceWorkerPath: "/BHG_order_system/onesignal/OneSignalSDKWorker.js",
+            serviceWorkerParam: { scope: "/bhg-frontend/onesignal/" },
+            serviceWorkerPath: "/bhg-frontend/onesignal/OneSignalSDKWorker.js",
             allowLocalhostAsSecureOrigin: location.hostname === 'localhost',
           });
           console.log('✅ OneSignal 已初始化');
