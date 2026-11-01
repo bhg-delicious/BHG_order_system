@@ -1,0 +1,37 @@
+{
+  "specVersion": "1.0",
+  "host": {
+    "displayName": "大家政便當廠",
+    "identifier": "bhg-delicious.github.io"
+  },
+  "entries": [
+    {
+      "identifier": "urn:ai:bhg-delicious.github.io:knowledge:llms-txt",
+      "displayName": "BHG 儲值點餐系統站點導覽 (llms.txt)",
+      "type": "text/plain",
+      "url": "https://bhg-delicious.github.io/BHG_order_system/llms.txt",
+      "description": "Curated index of core pages, admin functions, and legal policies for the BHG campus meal-ordering system. Formatted for LLM consumption."
+    },
+    {
+      "identifier": "urn:ai:bhg-delicious.github.io:knowledge:privacy-policy",
+      "displayName": "隱私權政策",
+      "type": "text/plain",
+      "url": "https://bhg-delicious.github.io/BHG_order_system/assets/legal/privacy_policy.txt",
+      "description": "Personal data collection, processing, and utilization policy under Taiwan's Personal Data Protection Act."
+    },
+    {
+      "identifier": "urn:ai:bhg-delicious.github.io:knowledge:terms-of-service",
+      "displayName": "服務條款",
+      "type": "text/plain",
+      "url": "https://bhg-delicious.github.io/BHG_order_system/assets/legal/terms_of_service.txt",
+      "description": "Terms governing the use of the BHG meal-ordering and balance system, including account management, recharge rules, and dispute resolution."
+    },
+    {
+      "identifier": "urn:ai:bhg-delicious.github.io:feed:announcements",
+      "displayName": "系統公告 RSS",
+      "type": "application/rss+xml",
+      "url": "https://bhg-delicious.github.io/BHG_order_system/assets/rss.xml",
+      "description": "RSS feed for system announcements, feature updates, and maintenance notices."
+    }
+  ]
+}
