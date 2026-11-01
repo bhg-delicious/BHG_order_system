@@ -1,50 +1,100 @@
 <div id="page-admin-users" class="page-container">
-    <div class="card">
-        <div class="card-header">
-            <h2 class="card-title">
-                <i class="fas fa-users-cog"></i> 用戶管理
-            </h2>
-        </div>
-
-        <div class="tabs-nav">
-            <button class="tab-btn active" data-tab="usr-query">餘額查詢</button>
-            <button class="tab-btn" data-tab="usr-change-id">更改學號</button>
-        </div>
-
-        <div id="usr-query" class="tab-content active">
-            <div class="button-group" style="margin-bottom: 15px;">
-                <button class="btn btn-secondary" onclick="getAllBalances(event)">查詢全體餘額</button>
-                <button class="btn btn-warning" onclick="getLowBalanceUsers(event)">查詢餘額低於100</button>
-            </div>
-            <div class="button-group" style="margin-bottom: 20px;">
-                <button class="btn btn-info" onclick="copyAllUsersList(event)">
-                    <i class="fas fa-copy"></i> 複製全體名單
-                </button>
-                <button class="btn btn-info" onclick="copyLowBalanceUsersList(event)">
-                    <i class="fas fa-copy"></i> 複製低餘額名單
-                </button>
-            </div>
-            <div id="adminQueryResult"></div>
-        </div>
-
-        <div id="usr-change-id" class="tab-content">
-            <div class="message warning" style="margin-bottom: 16px;">
-                <i class="fas fa-exclamation-triangle"></i>
-                <strong>注意：</strong>此操作將會變更使用者在所有系統中的學號，包括交易紀錄和訂單歷史。
-            </div>
-            <div class="form-group">
-                <label class="form-label">原學號</label>
-                <input type="text" id="changeOldUserId" class="form-control" placeholder="請輸入原6位數學號" maxlength="6" required inputmode="numeric" pattern="\d{6}" autocomplete="off">
-            </div>
-            <div class="form-group">
-                <label class="form-label">新學號</label>
-                <input type="text" id="changeNewUserId" class="form-control" placeholder="請輸入新6位數學號" maxlength="6" required inputmode="numeric" pattern="\d{6}" autocomplete="off">
-                <span class="form-text">新學號不能與現有學號重複</span>
-            </div>
-            <button type="button" class="btn btn-warning" onclick="confirmChangeUserId()">
-                <i class="fas fa-sync-alt"></i> 確認更改學號
-            </button>
-            <div id="changeUserIdResult" style="margin-top: 16px;"></div>
-        </div>
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <i class="fas fa-users-cog"></i> 用戶管理
+      </h2>
     </div>
+
+    <!-- ==================== Tabs 導覽 ==================== -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" data-tab="tab-change-id">
+        <i class="fas fa-id-card"></i> 更改學號
+      </button>
+      <button class="tab-btn" data-tab="tab-debt-whitelist">
+        <i class="fas fa-hand-holding-dollar"></i> 欠錢白名單
+      </button>
+    </div>
+
+    <!-- ==================== Tab 1：更改學號 ==================== -->
+    <div id="tab-change-id" class="tab-content active">
+      <p style="color: var(--gray); margin-bottom: 16px;">
+        更改使用者的學號，會同步更新交易紀錄與訂單歷史。
+      </p>
+
+      <div class="form-group">
+        <label class="form-label" for="changeOldUserId">原學號</label>
+        <input
+          type="text"
+          id="changeOldUserId"
+          class="form-control"
+          placeholder="請輸入 6 位數字"
+          maxlength="6"
+          inputmode="numeric"
+          pattern="\d{6}"
+        >
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="changeNewUserId">新學號</label>
+        <input
+          type="text"
+          id="changeNewUserId"
+          class="form-control"
+          placeholder="請輸入 6 位數字"
+          maxlength="6"
+          inputmode="numeric"
+          pattern="\d{6}"
+        >
+      </div>
+
+      <button class="btn btn-warning" onclick="confirmChangeUserId()">
+        <i class="fas fa-exchange-alt"></i> 確認更改
+      </button>
+
+      <div id="changeUserIdResult" style="margin-top: 15px;"></div>
+    </div>
+
+    <!-- ==================== Tab 2：欠錢白名單 ==================== -->
+    <div id="tab-debt-whitelist" class="tab-content">
+      <p style="color: var(--gray); margin-bottom: 16px;">
+        名單內的學生餘額不足時仍可點餐，餘額會變成負數（賒帳）。
+      </p>
+
+      <!-- 新增表單 -->
+      <form id="debtWhitelistAddForm" onsubmit="addDebtWhitelist(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr auto; gap: 8px;">
+          <input
+            id="dwUserId"
+            class="form-control"
+            placeholder="學號（6 位）"
+            maxlength="6"
+            inputmode="numeric"
+            pattern="\d{6}"
+            required
+          >
+          <input
+            id="dwNote"
+            class="form-control"
+            placeholder="備註（選填）"
+            maxlength="100"
+          >
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-plus"></i> 新增
+          </button>
+        </div>
+      </form>
+
+      <div id="dwResult" style="margin-top: 15px;"></div>
+
+      <div style="margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="loadDebtWhitelist(event)">
+          <i class="fas fa-sync"></i> 重新載入
+        </button>
+      </div>
+
+      <div id="dwDisplay" style="margin-top: 15px;"></div>
+    </div>
+
+  </div>
 </div>
