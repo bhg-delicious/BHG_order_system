@@ -68,6 +68,11 @@ async function logoutFromAccount() {
   try {
     const sb = await initSupabase();
     await sb.auth.signOut();
+
+    // 📊 GA4：使用者登出
+    pushCustomEvent('logout', {
+      user_type: 'student'
+    });
   } catch (e) {
     console.warn('登出失敗:', e);
   }
