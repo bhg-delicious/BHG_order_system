@@ -104,11 +104,11 @@ async function loginFromGate(event) {
     fillAllStudentIdInputs(studentId, true);
 
     // 📊 GA4：使用者登入
-    pushCustomEvent('login', {
+    /*pushCustomEvent('login', {
       method: 'email',
       student_id: studentId,
       user_type: 'student'
-    });
+    });*/
 
     if (resultDiv) {
       resultDiv.innerHTML = `<div class="message success">✅ 登入成功</div>`;
@@ -253,11 +253,11 @@ async function registerUser(event) {
     }
 
     // 📊 GA4：使用者註冊
-    pushCustomEvent('sign_up', {
+    /*pushCustomEvent('sign_up', {
       method: 'email',
       student_id: studentId,
       user_type: 'student'
-    });
+    });*/
 
     setTimeout(() => {
       navigateTo(getSmartHomePage());
