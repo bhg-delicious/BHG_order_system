@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/">
+
+  <channel>
+    <title>大家政便當廠 - 系統公告</title>
+    <link>https://bhg-delicious.github.io/BHG_order_system/?utm_source=rss.xml</link>
+    <description>大家政便當廠儲值與訂餐系統的版本更新、功能上線與系統維護公告。</description>
+    <language>zh-TW</language>
+    <lastBuildDate>Sat, 01 Nov 2026 00:00:00 +0800</lastBuildDate>
+    <atom:link href="https://bhg-delicious.github.io/BHG_order_system/assets/rss.xml"
+               rel="self" type="application/rss+xml" />
+
+    <!-- 系統公告／功能更新條目 -->
+    <item>
+      <title>訂餐中心上線：支援今日特選餐廳與歷史訂單</title>
+      <link>https://bhg-delicious.github.io/BHG_order_system/?page=user-order&utm_source=rss.xml</link>
+      <guid isPermaLink="false">bhg-announcement-20261101-01</guid>
+      <pubDate>Sat, 01 Nov 2026 11:45:14 +0800</pubDate>
+      <description><![CDATA[
+        <p>訂餐中心正式上線，可瀏覽今日特選餐廳、選擇分類並加入餐點，
+        送出訂單後即可在歷史訂單中查看紀錄。</p>
+      ]]></description>
+    </item>
+
+    <item>
+      <title>帳號頁面新增「總消費金額」統計</title>
+      <link>https://bhg-delicious.github.io/BHG_order_system/?page=user-account&utm_source=rss.xml</link>
+      <guid isPermaLink="false">bhg-announcement-20261015-01</guid>
+      <pubDate>Wed, 15 Oct 2026 11:45:14 +0800</pubDate>
+      <description><![CDATA[
+        <p>「我的帳號」頁面現在會顯示累計總消費金額，方便使用者快速掌握儲值與消費狀況。</p>
+      ]]></description>
+    </item>
+
+  </channel>
+</rss>
