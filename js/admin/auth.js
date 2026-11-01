@@ -99,11 +99,11 @@ async function adminLogin(event) {
     AppState.setAdmin(true, data.session.access_token, null);
 
     // 📊 GA4：管理員登入
-    pushCustomEvent('admin_login', {
+    /*pushCustomEvent('admin_login', {
       method: 'email',
       admin_email: email,
       user_type: 'admin'
-    });
+    });*/
 
     const statusText = document.getElementById('adminStatusText');
     const statusIcon = document.getElementById('adminStatusIcon');
@@ -136,9 +136,9 @@ async function adminLogout() {
     await sb.auth.signOut();
 
     // 📊 GA4：管理員登出
-    pushCustomEvent('admin_logout', {
+    /*pushCustomEvent('admin_logout', {
       user_type: 'admin'
-    });
+    });*/
   } catch (e) {
     console.warn('登出失敗:', e);
   }
@@ -276,9 +276,9 @@ async function changeAdminPassword(event) {
     }
 
     // 📊 GA4：管理員修改密碼
-    pushCustomEvent('admin_change_password', {
+    /*pushCustomEvent('admin_change_password', {
       user_type: 'admin'
-    });
+    });*/
 
     // 清空表單
     document.getElementById('adminOldPassword').value = '';
