@@ -3,7 +3,7 @@
 
   <!-- 應用程式入口（SPA 根路徑） -->
   <url>
-    <loc>https://bhg-delicious.github.io/BHG_order_system/?utm_source=sitemap</loc>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -11,7 +11,7 @@
 
   <!-- 使用者首頁 -->
   <url>
-    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=home&utm_source=sitemap</loc>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=home</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -19,7 +19,7 @@
 
   <!-- 訂餐中心 -->
   <url>
-    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=order&utm_source=sitemap</loc>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=order</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -27,7 +27,7 @@
 
   <!-- 我的帳號（餘額、交易紀錄、訂單查詢） -->
   <url>
-    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=account&utm_source=sitemap</loc>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=account</loc>
     <lastmod>2026-11-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
