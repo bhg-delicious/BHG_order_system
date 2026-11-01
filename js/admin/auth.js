@@ -101,7 +101,8 @@ async function adminLogin(event) {
     // 📊 GA4：管理員登入
     pushCustomEvent('admin_login', {
       method: 'email',
-      admin_email: email
+      admin_email: email,
+      user_type: 'admin'
     });
 
     const statusText = document.getElementById('adminStatusText');
@@ -133,6 +134,11 @@ async function adminLogout() {
   try {
     const sb = await initSupabase();
     await sb.auth.signOut();
+
+    // 📊 GA4：管理員登出
+    pushCustomEvent('admin_logout', {
+      user_type: 'admin'
+    });
   } catch (e) {
     console.warn('登出失敗:', e);
   }
