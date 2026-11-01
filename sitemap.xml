@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- 應用程式入口（SPA 根路徑） -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?utm_source=sitemap</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 使用者首頁 -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=home&utm_source=sitemap</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 訂餐中心 -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=order&utm_source=sitemap</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 我的帳號（餘額、交易紀錄、訂單查詢） -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/?page=account&utm_source=sitemap</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 隱私權政策 -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/assets/legal/privacy_policy.txt</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- 服務條款 -->
+  <url>
+    <loc>https://bhg-delicious.github.io/BHG_order_system/assets/legal/terms_of_service.txt</loc>
+    <lastmod>2026-11-01</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+</urlset>
