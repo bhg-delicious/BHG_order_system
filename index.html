@@ -2,12 +2,13 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
+    <base href="https://bhg-delicious.github.io/BHG_order_system/" target="_blank">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="keywords" content="大家政, 便當廠, 儲值系統, 訂餐系統">
     <meta name="description" content="校園儲值與訂餐系統">
     <meta name="author" content="gtes10301">
 
-    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
     <title>大家政便當廠-儲值系統</title>
 
     <link rel="manifest" href="manifest.webmanifest" type="application/manifest+json">
@@ -16,10 +17,12 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="便當廠">
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
 
     <link rel="preconnect" href="https://wvvmnombzkkrtxxxucqe.supabase.co" crossorigin>
     <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://analytics.google.com">
+    <link rel="preconnect" href="https://api.onesignal.com">
     <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm">
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.es6.js" defer></script>
@@ -34,6 +37,15 @@
     </noscript>
 
     <link rel="stylesheet" href="styles.css">
+
+    <meta name="google-site-verification" content="AkQAikafnBmeebrxOdgJlXoEXnwoEqwnDiyBI6UW8ho">
+    <link rel="canonical" href="https://bhg-delicious.github.io/BHG_order_system/?utm_source=canonical">
+    <link rel="alternate" type="application/rss+xml" title="大家政便當廠 - 儲值點餐系統公告" href="assets/rss.xml">
+
+    <script src="https://www.googletagmanager.com/gtm.js?id=GTM-56DFMCCC" defer></script>
+    <script src="https://www.googletagmanager.com/gtag/js?id=G-W1CE83K69G" defer></script>
+    <script src="js/google/gtag.js" defer></script>
+    <script src="js/google/analytics.js" defer></script>
 </head>
 <body>
     <header class="header">
@@ -59,7 +71,7 @@
         </div>
     </header>
 
-    <div id="pageContent">
+    <main id="pageContent">
 
         <!-- ==================== 登入 / 註冊頁面（首頁寫死） ==================== -->
         <div id="page-user-register" class="page-container active">
@@ -203,7 +215,7 @@
 
         </div>
 
-    </div>
+    </main>
 
     <button id="navToggleBtn" class="nav-toggle-btn" style="display: none;">
         <i class="fas fa-chevron-down"></i>
