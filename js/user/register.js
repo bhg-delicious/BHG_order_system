@@ -106,7 +106,8 @@ async function loginFromGate(event) {
     // 📊 GA4：使用者登入
     pushCustomEvent('login', {
       method: 'email',
-      student_id: studentId
+      student_id: studentId,
+      user_type: 'student'
     });
 
     if (resultDiv) {
@@ -254,7 +255,8 @@ async function registerUser(event) {
     // 📊 GA4：使用者註冊
     pushCustomEvent('sign_up', {
       method: 'email',
-      student_id: studentId
+      student_id: studentId,
+      user_type: 'student'
     });
 
     setTimeout(() => {
