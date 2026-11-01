@@ -103,9 +103,9 @@ async function submitChangePassword() {
     }
 
     // 📊 GA4：使用者修改密碼
-    pushCustomEvent('change_password', {
+    /*pushCustomEvent('change_password', {
       user_type: 'student'
-    });
+    });*/
 
     // 清空表單
     document.getElementById('changepwdOldPassword').value = '';
