@@ -70,9 +70,9 @@ async function logoutFromAccount() {
     await sb.auth.signOut();
 
     // 📊 GA4：使用者登出
-    pushCustomEvent('logout', {
+    /*pushCustomEvent('logout', {
       user_type: 'student'
-    });
+    });*/
   } catch (e) {
     console.warn('登出失敗:', e);
   }
