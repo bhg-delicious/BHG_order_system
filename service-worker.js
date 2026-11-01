@@ -48,7 +48,7 @@ self.addEventListener('fetch', function (event) {
       url.includes('supabase.co') || 
       url.includes('onesignal.com') || 
       url.includes('cdnjs.cloudflare.com') || 
-      url.includes('jsdelivr.net')) ||
+      url.includes('jsdelivr.net') ||
       url.includes('www.googletagmanager.com')) {
     return;
   }
