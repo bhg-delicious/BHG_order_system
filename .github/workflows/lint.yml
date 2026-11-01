@@ -39,18 +39,39 @@ jobs:
           done
           echo "✅ 所有關鍵檔案存在"
 
-      - name: Check SW VERSION format
+      - name: Check SW reads version from URL
         run: |
-          VERSION=$(grep -oP "const CACHE_NAME = 'bhg-cache-v\K[^']+" service-worker.js || echo "")
-          if [ -z "$VERSION" ]; then
-            echo "❌ service-worker.js 找不到 VERSION"
+          # 確認 service-worker.js 有從 URL 讀 ?v= 的邏輯
+          if ! grep -q "searchParams.get('v')" service-worker.js; then
+            echo "❌ service-worker.js 沒有從 URL 讀取版本號（缺少 searchParams.get('v')）"
             exit 1
           fi
-          if ! echo "$VERSION" | grep -qP '^\d+\.\d+\.\d+$'; then
-            echo "❌ VERSION 格式錯誤: $VERSION（應為 X.Y.Z）"
+          if ! grep -q 'bhg-cache-${SW_VERSION}' service-worker.js; then
+            echo "❌ service-worker.js 的 CACHE_NAME 沒有使用 SW_VERSION"
             exit 1
           fi
-          echo "✅ VERSION: $VERSION"
+          if grep -q "const CACHE_NAME = 'bhg-cache-v" service-worker.js; then
+            echo "❌ service-worker.js 仍有硬編碼的 CACHE_NAME（應改為從 URL 讀取）"
+            exit 1
+          fi
+          echo "✅ service-worker.js 正確從 URL 讀取版本號"
+
+      - name: Check index.html registers SW with version
+        run: |
+          # 確認 index.html 有從 Supabase 讀版本號並帶入 SW URL
+          if ! grep -q "from('system_settings')" index.html; then
+            echo "❌ index.html 沒有從 Supabase 讀取 version"
+            exit 1
+          fi
+          if ! grep -q "service-worker.js?v=" index.html; then
+            echo "❌ index.html 註冊 SW 時沒有帶 ?v= 參數"
+            exit 1
+          fi
+          if ! grep -q "updateViaCache: 'none'" index.html; then
+            echo "❌ index.html 註冊 SW 時缺少 updateViaCache: 'none'"
+            exit 1
+          fi
+          echo "✅ index.html 正確從 Supabase 讀版本並帶入 SW URL"
 
       - name: Check for undefined function references
         run: |
