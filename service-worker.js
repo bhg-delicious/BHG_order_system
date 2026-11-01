@@ -49,7 +49,8 @@ self.addEventListener('fetch', function (event) {
       url.includes('onesignal.com') || 
       url.includes('cdnjs.cloudflare.com') || 
       url.includes('jsdelivr.net') ||
-      url.includes('www.googletagmanager.com')) {
+      url.includes('www.googletagmanager.com') ||
+      url.includes('rss.xml')) {
     return;
   }
 
