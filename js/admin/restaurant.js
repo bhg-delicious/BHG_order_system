@@ -40,7 +40,6 @@ async function loadTodayRestaurantStatus() {
     const todayStatus = AppState.todayStatus();
 
     if (todayStatus === 'closed' && restaurant) {
-      // 已截止，顯示歷史資訊，允許設定新餐廳
       let endTimeStr = '10:00';
       try {
         const { data: endSetting } = await sb
@@ -69,7 +68,6 @@ async function loadTodayRestaurantStatus() {
       loadRestaurantOptions();
 
     } else if (todayStatus === 'open' && restaurant) {
-      // 開放點餐中
       let endTimeStr = '10:00';
       try {
         const { data: endSetting } = await sb
@@ -91,7 +89,6 @@ async function loadTodayRestaurantStatus() {
       if (cutoffBtn) cutoffBtn.style.display = 'block';
 
     } else {
-      // 尚未設定
       statusText.innerHTML = `⏳ 今日餐廳尚未設定，請選擇：`;
       statusDiv.style.backgroundColor = '#fff7ed';
       statusDiv.style.borderLeftColor = '#f97316';
@@ -187,7 +184,6 @@ async function doSetTodayRestaurant(restaurantName, orderEndTime, event) {
 
     assertRpcSuccess(data, 'set_today_restaurant');
 
-    // 更新前端狀態
     AppState.setCurrentRestaurantName(restaurantName);
     AppState.setTodayStatus('open');
     TIME.ORDER_END = parseInt(orderEndTime);
@@ -232,7 +228,6 @@ async function showTodayRestaurantStats(event) {
   try {
     const sb = await initSupabase();
 
-    // 1. 取今日餐廳名稱（僅用於標題顯示）
     const { data: setting } = await sb
       .from('system_settings')
       .select('value')
@@ -241,17 +236,15 @@ async function showTodayRestaurantStats(event) {
 
     const restaurantName = setting?.value || '';
 
-    // 2. 今天的時間範圍
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrowStart = new Date(todayStart);
     tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-    // 3. 直接讀 today_meals，只取今天未歸檔的
+    // ★ 只篩日期，不篩 is_archived（管理員截止後仍要能看）
     const { data: meals, error } = await sb
       .from('today_meals')
       .select('category, meal_name, amount, price')
-      .eq('is_archived', false)
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', tomorrowStart.toISOString());
 
@@ -264,17 +257,11 @@ async function showTodayRestaurantStats(event) {
       return;
     }
 
-    // 4. 按 (category, meal_name) 聚合
     const agg = {};
     meals.forEach(m => {
       const key = `${m.category}||${m.meal_name}`;
       if (!agg[key]) {
-        agg[key] = {
-          category: m.category,
-          meal_name: m.meal_name,
-          price: Number(m.price),
-          qty: 0
-        };
+        agg[key] = { category: m.category, meal_name: m.meal_name, price: Number(m.price), qty: 0 };
       }
       agg[key].qty += Number(m.amount);
     });
@@ -283,7 +270,6 @@ async function showTodayRestaurantStats(event) {
       a.category.localeCompare(b.category) || a.meal_name.localeCompare(b.meal_name)
     );
 
-    // 5. 渲染
     let totalCount = 0;
     let html = `<h4 style="margin-bottom: 10px;">🍽️ ${escapeHtml(restaurantName || '今日')} 餐點統計（今日）</h4>`;
     html += '<div class="table-container"><table class="table">';
@@ -311,7 +297,6 @@ async function copyRestaurantStatsList(event) {
   try {
     const sb = await initSupabase();
 
-    // 1. 取今日餐廳名稱
     const { data: setting } = await sb
       .from('system_settings')
       .select('value')
@@ -320,17 +305,15 @@ async function copyRestaurantStatsList(event) {
 
     const restaurantName = setting?.value || '';
 
-    // 2. 今天的時間範圍
     const now = new Date();
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const tomorrowStart = new Date(todayStart);
     tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-    // 3. 讀 today_meals
+    // ★ 只篩日期
     const { data: meals, error } = await sb
       .from('today_meals')
       .select('category, meal_name, amount, price')
-      .eq('is_archived', false)
       .gte('created_at', todayStart.toISOString())
       .lt('created_at', tomorrowStart.toISOString());
 
@@ -349,17 +332,11 @@ async function copyRestaurantStatsList(event) {
     if (!meals || meals.length === 0) {
       text += '今日尚無訂餐紀錄';
     } else {
-      // 按 (category, meal_name) 聚合
       const agg = {};
       meals.forEach(m => {
         const key = `${m.category}||${m.meal_name}`;
         if (!agg[key]) {
-          agg[key] = {
-            category: m.category,
-            meal_name: m.meal_name,
-            price: Number(m.price),
-            qty: 0
-          };
+          agg[key] = { category: m.category, meal_name: m.meal_name, price: Number(m.price), qty: 0 };
         }
         agg[key].qty += Number(m.amount);
       });
@@ -406,6 +383,7 @@ async function cutOffOrder() {
   try {
     const sb = await initSupabase();
 
+    // 截止前預覽：只算「未歸檔」的餐（cut_off_order 要處理的範圍）
     const { data: meals, error } = await sb
       .from('today_meals')
       .select('user_id, amount, price')
@@ -490,7 +468,6 @@ async function executeCutOffOrder() {
     }
     showMessageModal('✅ 截止訂餐', msg);
 
-    // 更新前端狀態
     AppState.setTodayStatus('closed');
     AppState.setCurrentRestaurantName('');
 
