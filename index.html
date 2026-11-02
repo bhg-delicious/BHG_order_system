@@ -31,16 +31,20 @@
 
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.es6.js" defer></script>
 
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-          media="print"
-          onload="this.media='all'">
+    <link rel="preload"
+          href="assets/font-awesome.css"
+          as="style"
+          onload="this.onload=null;this.rel='stylesheet'"
+    >
+    <link rel="preload"
+          href="styles.css"
+          as="style"
+          onload="this.onload=null;this.rel='stylesheet'"
+    >
     <noscript>
-      <link rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <link rel="stylesheet" href="assets/font-awesome.css">
+      <link rel="stylesheet" href="styles.css">
     </noscript>
-
-    <link rel="stylesheet" href="styles.css">
 
     <meta name="google-site-verification" content="AkQAikafnBmeebrxOdgJlXoEXnwoEqwnDiyBI6UW8ho">
     <meta name="referrer" content="unsafe-URL">
@@ -291,7 +295,7 @@
 <body>
     <header class="header">
         <div class="logo-container">
-            <img src="assets/icon-192.png" alt="BHG-logo" width="45" height="45" class="site-logo" fetchpriority="high" loading="eager">
+            <img src="assets/icon-192.png" alt="BHG-logo" class="site-logo" fetchpriority="high" loading="eager">
         </div>
 
         <div class="title-container">
