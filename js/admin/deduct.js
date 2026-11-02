@@ -44,12 +44,6 @@ async function deductBalance(event) {
 
     assertRpcSuccess(data, 'admin_deduct');
 
-    // 📊 GA4：管理員扣款
-    /*pushCustomEvent('deduct_success', {
-      student_id: studentId,
-      amount: Number(amount)
-    });*/
-
     if (resultDiv) {
       resultDiv.innerHTML = `<div class="message success"><i class="fas fa-check-circle"></i> ${escapeHtml(data.message)}</div>`;
     }
@@ -160,13 +154,21 @@ async function showCategoryOrderers() {
   try {
     const sb = await initSupabase();
 
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
+
+    // ★ 只篩日期，不篩 is_archived（管理員截止後仍要能看）
     const { data: meals, error } = await sb
       .from('today_meals')
       .select('user_id, meal_name, amount, category')
-      .eq('category', category);
+      .eq('category', category)
+      .gte('created_at', todayStart.toISOString())
+      .lt('created_at', tomorrowStart.toISOString());
 
     if (error || !meals || meals.length === 0) {
-      container.innerHTML = '<p style="color: var(--gray);">尚無訂購者</p>';
+      container.innerHTML = '<p style="color: var(--gray);">今日尚無訂購者</p>';
       currentCategoryOrderers = [];
       return;
     }
@@ -255,7 +257,7 @@ function confirmBatchDeductByCategory() {
 
 async function executeBatchDeductByCategory(restaurant, category, amount) {
   const resultDiv = document.getElementById('batchDeductResult');
-  const btn = document.querySelector('#page-admin-batch-deduct .btn-warning');
+  const btn = document.querySelector('#fin-deduct-batch .btn-warning');
 
   if (btn) setButtonLoading(btn, true);
   if (resultDiv) showConanLoading('batchDeductResult', 'batchDeductByCategory');
