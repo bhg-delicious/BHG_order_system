@@ -232,6 +232,7 @@ async function showTodayRestaurantStats(event) {
   try {
     const sb = await initSupabase();
 
+    // 1. 取今日餐廳名稱（僅用於標題顯示）
     const { data: setting } = await sb
       .from('system_settings')
       .select('value')
@@ -239,40 +240,57 @@ async function showTodayRestaurantStats(event) {
       .maybeSingle();
 
     const restaurantName = setting?.value || '';
-    if (!restaurantName) throw new Error('今日餐廳尚未設定');
 
-    const { data: restData } = await sb
-      .from('restaurants')
-      .select('id')
-      .eq('name', restaurantName)
-      .maybeSingle();
+    // 2. 今天的時間範圍
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-    if (!restData) throw new Error('找不到餐廳');
-
-    const { data: items, error } = await sb
-      .from('menu_items')
-      .select('category, meal_name, price, order_count')
-      .eq('restaurant_id', restData.id)
-      .gt('order_count', 0)
-      .order('category')
-      .order('meal_name');
+    // 3. 直接讀 today_meals，只取今天未歸檔的
+    const { data: meals, error } = await sb
+      .from('today_meals')
+      .select('category, meal_name, amount, price')
+      .eq('is_archived', false)
+      .gte('created_at', todayStart.toISOString())
+      .lt('created_at', tomorrowStart.toISOString());
 
     if (btn) setButtonLoading(btn, false);
 
     if (error) throw new Error(error.message);
 
-    if (!items || items.length === 0) {
-      if (resultDiv) resultDiv.innerHTML = '<div class="message info">暫無餐點資料</div>';
+    if (!meals || meals.length === 0) {
+      if (resultDiv) resultDiv.innerHTML = '<div class="message info">今日尚無訂餐紀錄</div>';
       return;
     }
 
+    // 4. 按 (category, meal_name) 聚合
+    const agg = {};
+    meals.forEach(m => {
+      const key = `${m.category}||${m.meal_name}`;
+      if (!agg[key]) {
+        agg[key] = {
+          category: m.category,
+          meal_name: m.meal_name,
+          price: Number(m.price),
+          qty: 0
+        };
+      }
+      agg[key].qty += Number(m.amount);
+    });
+
+    const rows = Object.values(agg).sort((a, b) =>
+      a.category.localeCompare(b.category) || a.meal_name.localeCompare(b.meal_name)
+    );
+
+    // 5. 渲染
     let totalCount = 0;
-    let html = `<h4 style="margin-bottom: 10px;">🍽️ ${escapeHtml(restaurantName)} 餐點統計</h4>`;
+    let html = `<h4 style="margin-bottom: 10px;">🍽️ ${escapeHtml(restaurantName || '今日')} 餐點統計（今日）</h4>`;
     html += '<div class="table-container"><table class="table">';
     html += '<tr><th>種類</th><th>品項</th><th>數量</th></tr>';
-    items.forEach(item => {
-      html += `<tr><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.meal_name)}</td><td>${item.order_count}</td></tr>`;
-      totalCount += Number(item.order_count);
+    rows.forEach(item => {
+      html += `<tr><td>${escapeHtml(item.category)}</td><td>${escapeHtml(item.meal_name)}</td><td>${item.qty}</td></tr>`;
+      totalCount += item.qty;
     });
     html += '</table></div>';
     html += `<p style="margin-top: 8px; color: var(--gray); font-size: 0.9rem;">總份數：${totalCount} 份</p>`;
@@ -293,6 +311,7 @@ async function copyRestaurantStatsList(event) {
   try {
     const sb = await initSupabase();
 
+    // 1. 取今日餐廳名稱
     const { data: setting } = await sb
       .from('system_settings')
       .select('value')
@@ -300,53 +319,71 @@ async function copyRestaurantStatsList(event) {
       .maybeSingle();
 
     const restaurantName = setting?.value || '';
-    if (!restaurantName) throw new Error('今日餐廳尚未設定');
 
-    const { data: restData } = await sb
-      .from('restaurants')
-      .select('id')
-      .eq('name', restaurantName)
-      .maybeSingle();
+    // 2. 今天的時間範圍
+    const now = new Date();
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(tomorrowStart.getDate() + 1);
 
-    const { data: items, error } = await sb
-      .from('menu_items')
-      .select('category, meal_name, price, order_count')
-      .eq('restaurant_id', restData.id)
-      .gt('order_count', 0)
-      .order('category')
-      .order('meal_name');
+    // 3. 讀 today_meals
+    const { data: meals, error } = await sb
+      .from('today_meals')
+      .select('category, meal_name, amount, price')
+      .eq('is_archived', false)
+      .gte('created_at', todayStart.toISOString())
+      .lt('created_at', tomorrowStart.toISOString());
 
     if (btn) setButtonLoading(btn, false);
 
     if (error) throw new Error(error.message);
 
-    const now = new Date();
-    const dateStr = now.toLocaleDateString('zh-TW');
-    const timeStr = now.toLocaleTimeString('zh-TW', { hour12: false });
+    const genDate = new Date();
+    const dateStr = genDate.toLocaleDateString('zh-TW');
+    const timeStr = genDate.toLocaleTimeString('zh-TW', { hour12: false });
 
-    let text = `【大家政便當廠】${restaurantName} 餐點統計\n`;
+    let text = `【大家政便當廠】${restaurantName || '今日'} 餐點統計（今日）\n`;
     text += `生成時間：${dateStr} ${timeStr}\n`;
     text += `════════════════════\n\n`;
 
-    if (!items || items.length === 0) {
-      text += '暫無餐點資料';
+    if (!meals || meals.length === 0) {
+      text += '今日尚無訂餐紀錄';
     } else {
+      // 按 (category, meal_name) 聚合
+      const agg = {};
+      meals.forEach(m => {
+        const key = `${m.category}||${m.meal_name}`;
+        if (!agg[key]) {
+          agg[key] = {
+            category: m.category,
+            meal_name: m.meal_name,
+            price: Number(m.price),
+            qty: 0
+          };
+        }
+        agg[key].qty += Number(m.amount);
+      });
+
+      const rows = Object.values(agg).sort((a, b) =>
+        a.category.localeCompare(b.category) || a.meal_name.localeCompare(b.meal_name)
+      );
+
       let totalCount = 0;
       let currentCategory = '';
-      items.forEach(item => {
+      rows.forEach(item => {
         if (item.category !== currentCategory) {
           currentCategory = item.category;
           text += `【${currentCategory}】\n`;
         }
-        text += `  ${item.meal_name} x${item.order_count}  (${item.price}元)\n`;
-        totalCount += Number(item.order_count);
+        text += `  ${item.meal_name} x${item.qty}  (${item.price}元)\n`;
+        totalCount += item.qty;
       });
       text += `\n════════════════════\n`;
       text += `總份數：${totalCount} 份\n`;
     }
 
     await copyToClipboard(text);
-    showMessageModal('✅ 成功', `已複製 ${restaurantName} 餐點統計`);
+    showMessageModal('✅ 成功', `已複製 ${restaurantName || '今日'} 餐點統計（今日）`);
 
   } catch (error) {
     if (btn) setButtonLoading(btn, false);
